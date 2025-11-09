@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: account-deployment
+  namespace: isc
+  labels:
+    app: account-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: account-service
+  template:
+    metadata:
+      labels:
+        app: account-service
+    spec:
+      containers:
+        - name: account
+          image: intersvc-account:dev
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DATABASE_URL
+              value: "sqlite:///./accounts.db"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: account-service
+  namespace: isc
+spec:
+  selector:
+    app: account-service
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: ClusterIP
